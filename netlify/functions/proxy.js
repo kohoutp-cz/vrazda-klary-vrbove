@@ -11,6 +11,7 @@ export async function handler(event) {
   });
 
   const data = await response.json();
+  console.log("OpenAI response:", JSON.stringify(data)); // ✨ Přidat pro ladění
 
   return {
     statusCode: 200,
