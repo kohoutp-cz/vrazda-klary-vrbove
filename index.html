@@ -146,7 +146,7 @@ Na konci řekni verdikt. Tím hra končí.`
     chatBox.appendChild(thinking);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    const response = await fetch("/.netlify/functions/proxy", {
+    const response = await fetch('/.netlify/functions/proxy', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: input, history: messages })
