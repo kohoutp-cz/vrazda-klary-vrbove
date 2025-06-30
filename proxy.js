@@ -1,26 +1,19 @@
+export async function handler(event) {
+  const apiKey = process.env.OPENAI_API_KEY;
 
-const { Configuration, OpenAIApi } = require("openai");
-
-exports.handler = async function(event) {
-  const body = JSON.parse(event.body);
-  const message = body.message;
-
-  const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: event.body
   });
 
-  const openai = new OpenAIApi(configuration);
-
-  const completion = await openai.createChatCompletion({
-    model: "gpt-4",
-    messages: [
-      { role: "system", content: "Jsi zkušený detektiv. Máš za úkol vyslechnout osobu podezřelou z vraždy. Tvoje otázky by měly být klidné, důsledné a odhalovat nesrovnalosti." },
-      { role: "user", content: message }
-    ]
-  });
+  const data = await response.json();
 
   return {
     statusCode: 200,
-    body: JSON.stringify({ reply: completion.data.choices[0].message.content })
+    body: JSON.stringify(data),
   };
-};
+}
