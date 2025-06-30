@@ -1,39 +1,151 @@
+<div id="interaktivni-vyslech"></div>
+<script>
+window.onload = async () => {
+  const container = document.getElementById("interaktivni-vyslech");
+  container.innerHTML = `
+    <style>
+      #chatBox { background: #111; color: #eee; padding: 10px; border: 1px solid #444; height: 400px; overflow-y: auto; font-family: sans-serif; font-size: 14px; }
+      .msg-user { color: #9fdfbf; }
+      .msg-assistant { color: #df9f9f; margin-bottom: 10px; }
+      .msg-system { color: #aaa; font-style: italic; }
+      #chatForm { display: flex; margin-top: 10px; gap: 5px; }
+      #chatInput { flex: 1; padding: 8px; font-size: 14px; }
+      #chatBtn { padding: 8px; font-size: 14px; background: #333; color: white; border: none; cursor: pointer; }
+    </style>
+    <div id="chatBox"></div>
+    <div id="chatForm">
+      <input id="chatInput" type="text" placeholder="Vaše odpověď...">
+      <button id="chatBtn">Odeslat</button>
+    </div>
+  `;
 
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Výslechová hra</title>
-</head>
-<body>
-  <h1>Výslechová hra </h1>
-  <p>Staňte se svědkem nebo podezřelým a zkuste detektiva přesvědčit o své nevině…</p>
-  <div id="chatbox"></div>
-  <input type="text" id="userInput" placeholder="Napište svou odpověď…" />
-  <button onclick="sendMessage()">Odeslat</button>
+  const chatBox = container.querySelector("#chatBox");
+  const chatInput = container.querySelector("#chatInput");
+  const chatBtn = container.querySelector("#chatBtn");
 
-  <script>
-    async function sendMessage() {
-      const input = document.getElementById("userInput");
-      const message = input.value;
-      if (!message) return;
+  let messages = [
+    {
+      role: "system",
+      content: `Jsi zkušený detektiv s 20 lety praxe u kriminální policie. Obětí je žena jménem Klára Vrbová, nalezená mrtvá ve vaně. Máš tyto důkazy:
+– otisky podezřelého na skle koupelny,
+– svědectví sousedky o hádce,
+– nesedící alibi (mobil u místa činu),
+– SMS: „Jestli dnes nedorazím, volej policii.“
 
-      const chatbox = document.getElementById("chatbox");
-      chatbox.innerHTML += "<p><strong>Vy:</strong> " + message + "</p>";
-      input.value = "";
+Na začátku výslechu podezřelému důkazy shrň. Pak ho začni vyslýchat. Pokud odpovídá vyhýbavě nebo popírá důkazy, zvyšuj tlak. Pokud odpovědi dávají smysl, zvaž empatii.
 
-      chatbox.innerHTML += "<p><em>Detektiv přemýšlí...</em></p>";
+Po 10 minutách výslechu se musíš rozhodnout:
+1. Odpovídal vyhýbavě, ignoroval důkazy → obvinit.
+2. Odpovědi byly věrohodné, konzistentní → propustit.
+3. Smíšené odpovědi → sledovat dál.
 
-      const response = await fetch("/.netlify/functions/proxy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message })
-      });
-
-      const data = await response.json();
-      chatbox.innerHTML += "<p><strong>Detektiv:</strong> " + data.reply + "</p>";
+Na konci řekni verdikt. Tím hra končí.`
+    },
+    {
+      role: "assistant",
+      content: `Zřejmě víte, proč jste zde, že? Máme stopy, které ukazují, že máte něco společného se smrtí Kláry Vrbové. Máme vaše otisky na skle v koupelně, kde byla nalezena mrtvá. Sousedka vás slyšela hádat se s Klárou tu noc. Váš mobil se připojil ke stanici pár set metrů od jejího bytu. A pak je tu ta ještě zpráva od Kláry kamarádce Lucii, se kterou se měla sejít: "Jestli dnes nedorazím, volej policii". Co mi k tomu můžete říct?`
     }
-  </script>
-</body>
-</html>
+  ];
+
+  let timerStarted = false;
+  let gameEnded = false;
+  let timer;
+
+  appendMessage("assistant", messages[1].content);
+
+  chatBtn.onclick = sendMessage;
+  chatInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  function appendMessage(role, text) {
+    const div = document.createElement("div");
+    div.className = "msg-" + role;
+    div.textContent = (role === "user" ? "Vy: " : "Detektiv: ") + text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  async function sendMessage() {
+    if (gameEnded) return;
+
+    const input = chatInput.value.trim();
+    if (!input) return;
+    appendMessage("user", input);
+    messages.push({ role: "user", content: input });
+    chatInput.value = "";
+
+    if (!timerStarted) {
+      timerStarted = true;
+      timer = setTimeout(endGame, 10 * 60 * 1000);
+      setTimeout(issueWarning, 7 * 60 * 1000);
+    }
+
+    const thinking = document.createElement("div");
+    thinking.className = "msg-system";
+    thinking.textContent = "Detektiv přemýšlí...";
+    chatBox.appendChild(thinking);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const response = await fetch("/.netlify/functions/proxy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: input, history: messages })
+    });
+
+    thinking.remove();
+
+    const data = await response.json();
+    const reply = data.reply;
+    messages.push({ role: "assistant", content: reply });
+    appendMessage("assistant", reply);
+  }
+
+  async function issueWarning() {
+    if (gameEnded) return;
+    const warning = "Odpovídáte už dost dlouho a pořád tu jsou rozpory. Pokud mě během následujících odpovědí nepřesvědčíte, budu vás muset obvinit. Zvažte dobře, co řeknete dál.";
+    messages.push({ role: "assistant", content: warning });
+    appendMessage("assistant", warning);
+  }
+
+  async function endGame() {
+    if (gameEnded) return;
+    gameEnded = true;
+    chatInput.disabled = true;
+    chatBtn.disabled = true;
+
+    const conclusionMsg = {
+      role: "system",
+      content: "Čas výslechu vypršel. Zhodnoť odpovědi podezřelého a vydej závěrečný verdikt: obviněn / propuštěn / sledován. Tím výslech končí."
+    };
+    messages.push(conclusionMsg);
+
+    const thinking = document.createElement("div");
+    thinking.className = "msg-system";
+    thinking.textContent = "Detektiv se rozhoduje…";
+    chatBox.appendChild(thinking);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const response = await fetch("/.netlify/functions/proxy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "", history: messages })
+    });
+
+    thinking.remove();
+
+    const data = await response.json();
+    const reply = data.reply;
+    messages.push({ role: "assistant", content: reply });
+    appendMessage("assistant", reply);
+
+    const endNote = document.createElement("div");
+    endNote.className = "msg-system";
+    endNote.textContent = "Výslech byl ukončen. Děkujeme za účast.";
+    chatBox.appendChild(endNote);
+  }
+};
+</script>
