@@ -149,13 +149,13 @@ Na konci řekni verdikt. Tím hra končí.`
     const response = await fetch('/.netlify/functions/proxy', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: input, history: messages })
+      body: JSON.stringify({ model: "gpt-3.5-turbo", messages: messages })
     });
 
     thinking.remove();
 
     const data = await response.json();
-    const reply = data.reply;
+    const reply = data.choices?.[0]?.message?.content || "⚠️ Detektiv mlčí...";
     messages.push({ role: "assistant", content: reply });
     appendMessage("assistant", reply);
   }
@@ -184,19 +184,6 @@ Na konci řekni verdikt. Tím hra končí.`
     thinking.textContent = "Detektiv se rozhoduje…";
     chatBox.appendChild(thinking);
     chatBox.scrollTop = chatBox.scrollHeight;
-
-    const response = await fetch("/.netlify/functions/proxy", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: "", history: messages })
-    });
-
-    thinking.remove();
-
-    const data = await response.json();
-    const reply = data.reply;
-    messages.push({ role: "assistant", content: reply });
-    appendMessage("assistant", reply);
 
     const endNote = document.createElement("div");
     endNote.className = "msg-system";
