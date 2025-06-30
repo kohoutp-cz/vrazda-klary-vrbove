@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Výslechová hra</title>
+</head>
+<body>
+  <h1>Výslechová hra</h1>
+  <p>Staňte se svědkem nebo podezřelým a zkuste detektiva přesvědčit o své nevině…</p>
+  <div id="chatbox"></div>
+  <input type="text" id="userInput" placeholder="Napište svou odpověď…" />
+  <button onclick="sendMessage()">Odeslat</button>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const message = input.value;
+      if (!message) return;
+
+      const chatbox = document.getElementById("chatbox");
+      chatbox.innerHTML += "<p><strong>Vy:</strong> " + message + "</p>";
+      input.value = "";
+
+      chatbox.innerHTML += "<p><em>Detektiv přemýšlí...</em></p>";
+
+      const response = await fetch("/.netlify/functions/proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+
+      const data = await response.json();
+      chatbox.innerHTML += "<p><strong>Detektiv:</strong> " + data.reply + "</p>";
+    }
+  </script>
+</body>
+</html>
