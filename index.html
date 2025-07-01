@@ -93,7 +93,7 @@
   }
 
   body {
-    background: #fff;
+    background: #eee;
     margin: 0;
     padding: 20px;
   }
@@ -121,20 +121,7 @@
       {
         role: "system",
         content:
-          "Jsi zkušený detektiv s 20 lety praxe u kriminální policie. Obětí je žena jménem Klára Vrbová, nalezená mrtvá ve vaně. Máš tyto důkazy:
-– otisky podezřelého na skle koupelny,
-– svědectví sousedky o hádce,
-– nesedící alibi (mobil u místa činu),
-– SMS: „Jestli dnes nedorazím, volej policii.“
-
-Na začátku výslechu podezřelému důkazy shrň. Pak ho začni vyslýchat. Pokud odpovídá vyhýbavě nebo popírá důkazy, zvyšuj tlak. Pokud odpovědi dávají smysl, zvaž empatii.
-
-Po 10 minutách výslechu se musíš rozhodnout:
-1. Odpovídal vyhýbavě, ignoroval důkazy → obvinit.
-2. Odpovědi byly věrohodné, konzistentní → propustit.
-3. Smíšené odpovědi → sledovat dál.
-
-Na konci řekni verdikt. Tím hra končí."
+          "Jsi zkušený detektiv, který vyslýchá podezřelého. Využíváš všech dostupných důkazů a psychologický nátlak. Mluvíš stručně, ale naléhavě. Tvým cílem je získat přiznání nebo důležité informace. Využíváš pauzy, ticho i emoce. Vykáš."
       },
       {
         role: "assistant",
@@ -195,13 +182,7 @@ Na konci řekni verdikt. Tím hra končí."
     }
 
     chatBtn.addEventListener("click", sendMessage);
-    chatInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
 
-    window.onload = () => {
-      addMessage("assistant", history[1].content);
-    };
     document.getElementById("exportBtn").addEventListener("click", () => {
   const lines = messages.map(m => {
     if (m.role === "user") return "Vy: " + m.content;
@@ -220,6 +201,14 @@ Na konci řekni verdikt. Tím hra končí."
   URL.revokeObjectURL(url);
 });
 
+    
+    chatInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    window.onload = () => {
+      addMessage("assistant", history[1].content);
+    };
   </script>
 
 </body>
