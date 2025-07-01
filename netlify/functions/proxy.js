@@ -26,21 +26,5 @@ exports.handler = async function (event) {
       body: JSON.stringify({ reply: "⚠️ Došlo k chybě na straně serveru." }),
     };
   }
-  document.getElementById("exportBtn").addEventListener("click", () => {
-  const lines = messages.map(m => {
-    if (m.role === "user") return "Vy: " + m.content;
-    if (m.role === "assistant") return "Detektiv: " + m.content;
-    return "";
-  });
-  const text = lines.join("\n\n");
-  const blob = new Blob([text], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "vyslech.txt";
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
+  
 };
