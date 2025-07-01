@@ -4,57 +4,91 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Výslech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
+    #chatBox {
+      background: #f5f5f5;
+      color: #222;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      height: 400px;
+      overflow-y: auto;
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .msg-user {
+      color: #007733; /* zelená pro uživatele */
+      font-weight: 500;
+    }
+
+    .msg-assistant {
+      color: #cc0000; /* červená pro detektiva */
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .msg-system {
+      color: #888;
+      font-style: italic;
+      margin: 10px 0;
+    }
+
+    #chatForm {
+      display: flex;
+      margin-top: 15px;
+      gap: 10px;
+      max-width: 800px;
+      margin-inline: auto;
+    }
+
+    #chatInput {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    #chatBtn {
+      padding: 12px 20px;
+      font-size: 16px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      transition: background 0.3s;
+    }
+
+    #chatBtn:hover {
+      background: #000;
+    }
+
     body {
-      font-family: sans-serif;
       background: #eee;
       margin: 0;
-      padding: 0;
-    }
-    #chat {
-      max-width: 800px;
-      margin: 2em auto;
-      background: white;
-      padding: 1em;
-      border-radius: 8px;
-      min-height: 300px;
-    }
-    .msg {
-      margin: 1em 0;
-    }
-    .user {
-      color: green;
-    }
-    .assistant {
-      color: darkred;
-    }
-    input, button {
-      font-size: 1em;
-      padding: 0.5em;
-    }
-    #form {
-      display: flex;
-      justify-content: center;
-      margin: 1em auto;
-      max-width: 800px;
-      gap: 0.5em;
-    }
-    #input {
-      flex: 1;
+      padding: 20px;
     }
   </style>
 </head>
 <body>
-  <div id="chat"></div>
-  <div id="form">
-    <input type="text" id="input" placeholder="Naše odpověď…" />
-    <button id="send">Odeslat</button>
+
+  <div id="chatBox"></div>
+
+  <div id="chatForm">
+    <input type="text" id="chatInput" placeholder="Naše odpověď…" />
+    <button id="chatBtn">Odeslat</button>
   </div>
 
   <script>
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("input");
-    const send = document.getElementById("send");
+    const chatBox = document.getElementById("chatBox");
+    const chatInput = document.getElementById("chatInput");
+    const chatBtn = document.getElementById("chatBtn");
 
     let history = [
       {
@@ -71,18 +105,26 @@
 
     function addMessage(role, text) {
       const div = document.createElement("div");
-      div.className = "msg " + role;
-      div.textContent = (role === "user" ? "Vy: " : "Detektiv: ") + text;
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+      if (role === "user") {
+        div.className = "msg-user";
+        div.textContent = "Vy: " + text;
+      } else if (role === "assistant") {
+        div.className = "msg-assistant";
+        div.textContent = "Detektiv: " + text;
+      } else {
+        div.className = "msg-system";
+        div.textContent = text;
+      }
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     async function sendMessage() {
-      const userInput = input.value.trim();
+      const userInput = chatInput.value.trim();
       if (!userInput) return;
 
       addMessage("user", userInput);
-      input.value = "";
+      chatInput.value = "";
 
       history.push({ role: "user", content: userInput });
 
@@ -106,8 +148,8 @@
       }
     }
 
-    send.addEventListener("click", sendMessage);
-    input.addEventListener("keypress", (e) => {
+    chatBtn.addEventListener("click", sendMessage);
+    chatInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendMessage();
     });
 
@@ -115,5 +157,6 @@
       addMessage("assistant", history[1].content);
     };
   </script>
+
 </body>
 </html>
