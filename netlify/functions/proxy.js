@@ -1,29 +1,29 @@
-const { OpenAI } = require("openai");
+const OpenAI = require("openai");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-exports.handler = async function (event, context) {
+exports.handler = async function (event) {
   try {
     const { message, history } = JSON.parse(event.body);
 
-    const chatCompletion = await openai.chat.completions.create({
+    const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: history,
     });
 
-    const reply = chatCompletion.choices?.[0]?.message?.content?.trim();
+    const reply = response.choices[0].message.content.trim();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ reply: reply || "⚠️ Detektiv mlčí..." }),
+      body: JSON.stringify({ reply }),
     };
   } catch (error) {
-    console.error("Chyba v proxy funkci:", error.message);
+    console.error("Proxy error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ reply: "⚠️ Došlo k chybě na straně serveru." }),
+      body: JSON.stringify({ reply: "⚠️ Došlo k chybě na serveru." }),
     };
   }
 };
