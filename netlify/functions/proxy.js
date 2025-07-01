@@ -1,23 +1,19 @@
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai");
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 exports.handler = async function (event, context) {
   try {
     const { message, history } = JSON.parse(event.body);
-    console.log("Získaná historie:", JSON.stringify(history, null, 2));
 
-    const configuration = new Configuration({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-    const openai = new OpenAIApi(configuration);
-
-    const completion = await openai.createChatCompletion({
+    const chatCompletion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: history,
     });
 
-    console.log("Odpověď z OpenAI:", completion.data);
-
-    const reply = completion.data.choices[0]?.message?.content || "⚠️ Detektiv mlčí...";
+    const reply = chatCompletion.choices?.[0]?.message?.content || "⚠️ Detektiv mlčí...";
 
     return {
       statusCode: 200,
