@@ -6,21 +6,21 @@ const openai = new OpenAI({
 
 exports.handler = async function (event) {
   try {
-    const { message, history } = JSON.parse(event.body);
+    const { history } = JSON.parse(event.body);
 
-    const chatCompletion = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: history,
     });
 
-    const reply = chatCompletion.choices[0].message.content.trim();
+    const reply = completion.choices?.[0]?.message?.content?.trim();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ reply }),
+      body: JSON.stringify({ reply: reply || "⚠️ Detektiv mlčí..." }),
     };
   } catch (error) {
-    console.error("❌ Proxy error:", error.message, error.stack);
+    console.error("CHYBA:", error.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ reply: "⚠️ Došlo k chybě na straně serveru." }),
