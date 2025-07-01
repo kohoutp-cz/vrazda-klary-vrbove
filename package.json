@@ -1,7 +1,6 @@
 {
-  "name": "vrazda-klar-vrbove",
+  "name": "vrazda-klary-vrbove",
   "version": "1.0.0",
-  "main": "index.html",
   "type": "commonjs",
   "dependencies": {
     "openai": "^4.20.0"
