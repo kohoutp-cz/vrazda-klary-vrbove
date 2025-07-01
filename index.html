@@ -3,19 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Detektivní výslech</title>
+  <title>Výslech</title>
   <style>
-    body { font-family: sans-serif; max-width: 800px; margin: 2em auto; }
-    .bot { color: darkred; }
-    .user { color: green; }
-    .msg { margin: 1em 0; }
+    body {
+      font-family: sans-serif;
+      background: #eee;
+      margin: 0;
+      padding: 0;
+    }
+    #chat {
+      max-width: 800px;
+      margin: 2em auto;
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      min-height: 300px;
+    }
+    .msg {
+      margin: 1em 0;
+    }
+    .user {
+      color: green;
+    }
+    .assistant {
+      color: darkred;
+    }
+    input, button {
+      font-size: 1em;
+      padding: 0.5em;
+    }
+    #form {
+      display: flex;
+      justify-content: center;
+      margin: 1em auto;
+      max-width: 800px;
+      gap: 0.5em;
+    }
+    #input {
+      flex: 1;
+    }
   </style>
 </head>
 <body>
-  <h1>Detektivní výslech</h1>
   <div id="chat"></div>
-  <input type="text" id="input" placeholder="Naše odpověď..." style="width: 80%;" />
-  <button id="send">Odeslat</button>
+  <div id="form">
+    <input type="text" id="input" placeholder="Naše odpověď…" />
+    <button id="send">Odeslat</button>
+  </div>
 
   <script>
     const chat = document.getElementById("chat");
@@ -25,17 +59,19 @@
     let history = [
       {
         role: "system",
-        content: "Jsi detektiv, který vyslýchá podezřelého v případu vraždy Kláry Vrbové. Ptej se stručně, ale naléhavě."
+        content:
+          "Jsi zkušený detektiv, který vyslýchá podezřelého. Využíváš všech dostupných důkazů a psychologický nátlak. Mluvíš stručně, ale naléhavě. Tvým cílem je získat přiznání nebo důležité informace. Využíváš pauzy, ticho i emoce. Vykáš."
       },
       {
         role: "assistant",
-        content: "Zřejmě víte, proč jste zde, že? Máme stopy, které ukazují, že máte něco společného se smrtí Kláry Vrbové..."
+        content:
+          "Zřejmě víte, proč jste zde, že? Máme stopy, které ukazují, že máte něco společného se smrtí Kláry Vrbové. Máme vaše otisky na skle v koupelně, kde byla nalezena mrtvá. Sousedka vás slyšela hádat se s Klárou tu noc. Váš mobil se připojil ke stanici pár set metrů od jejího bytu. A pak je tu ta ještě zpráva od Kláry kamarádce Lucii, se kterou se měla sejít: „Jestli dnes nedorazím, volej policii“. Co mi k tomu můžete říct?"
       }
     ];
 
     function addMessage(role, text) {
       const div = document.createElement("div");
-      div.className = "msg " + (role === "user" ? "user" : "bot");
+      div.className = "msg " + role;
       div.textContent = (role === "user" ? "Vy: " : "Detektiv: ") + text;
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
@@ -60,22 +96,21 @@
         });
 
         const data = await response.json();
-        const reply = data.reply || "⚠️ Detektiv mlčí...";
+        const reply = data.reply || "⚠️ Detektiv mlčí…";
         addMessage("assistant", reply);
 
         history.push({ role: "assistant", content: reply });
       } catch (error) {
-        addMessage("assistant", "⚠️ Došlo k chybě.");
-        console.error("Chyba při komunikaci s proxy:", error);
+        addMessage("assistant", "⚠️ Došlo k chybě na straně serveru.");
+        console.error("Chyba proxy:", error);
       }
     }
 
     send.addEventListener("click", sendMessage);
-    input.addEventListener("keypress", function (e) {
+    input.addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendMessage();
     });
 
-    // Zobrazí první zprávu detektiva
     window.onload = () => {
       addMessage("assistant", history[1].content);
     };
