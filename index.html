@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Výslech</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-  <style>
+<style>
   #chatBox {
     background: #f5f5f5;
     color: #222;
@@ -65,10 +65,12 @@
     gap: 10px;
     max-width: 800px;
     margin-inline: auto;
+    flex-wrap: wrap;
   }
 
   #chatInput {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     padding: 12px;
     font-size: 16px;
     border: 1px solid #ccc;
@@ -86,6 +88,7 @@
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
     transition: background 0.3s;
+    flex-shrink: 0;
   }
 
   #chatBtn:hover {
@@ -96,7 +99,19 @@
     margin: 0;
     padding: 20px;
   }
+
+  /* 📱 Mobilní optimalizace */
+  @media (max-width: 600px) {
+    #chatForm {
+      flex-direction: column;
+    }
+
+    #chatBtn {
+      width: 100%;
+    }
+  }
 </style>
+
 
 </head>
 <body>
